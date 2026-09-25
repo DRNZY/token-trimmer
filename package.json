@@ -1,0 +1,39 @@
+{
+  "name": "token-trimmer",
+  "version": "1.0.0",
+  "description": "High-performance token saving, AST skeletonization, and prompt context minimization engine for AI coding",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "token-trimmer": "./dist/bin/cli.js",
+    "token-trimmer-mcp": "./dist/bin/mcp.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/bin/cli.js dist/bin/mcp.js",
+    "prepare": "npm run build",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/test/*.test.js"
+  },
+  "keywords": [
+    "token-saver",
+    "prompt-compression",
+    "ast-skeleton",
+    "repomix",
+    "context-optimizer",
+    "llm"
+  ],
+  "author": "darnell",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0",
+    "gpt-tokenizer": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4"
+  }
+}
