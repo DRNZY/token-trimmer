@@ -1,18 +1,12 @@
 # token-trimmer
 
-High-performance AST code skeletonizer, comment stripper, and context packer for LLMs.
+AST skeletonizer and context budget packer for LLM prompts.
 
-## Overview
+## What it does
 
-Token Trimmer reduces token consumption in large codebases by stripping whitespace, removing non-critical comments, and skeletonizing AST structures (function signatures, type definitions) so agents can inspect massive repositories within tight context budgets.
+Strips function bodies, implementation details, and extraneous comments from source files while keeping type definitions and signatures intact. This lets coding agents read large codebases within fixed context windows.
 
-## Features
-
-- **AST Skeletonization**: Extracts structural signatures while stripping implementation bodies.
-- **Prompt Budget Packaging**: Packs repository context into token-optimized payloads.
-- **MCP Server & CLI**: Runs as a standalone tool or as a Model Context Protocol (MCP) server.
-
-## Installation
+## Setup
 
 ```bash
 npm install
@@ -21,4 +15,4 @@ npm run build
 
 ## License
 
-MIT
+MIT License. Copyright (c) 2026 Darnell Dijksteel.
