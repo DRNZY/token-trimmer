@@ -12,6 +12,23 @@ import { skeletonize } from './skeletonizer';
 import { stripCodeNoise } from './stripper';
 import { packDirectory } from './packager';
 
+function resolveReadableFile(filePath: string): string {
+  const resolved = path.resolve(filePath);
+  if (!fs.existsSync(resolved)) {
+    throw new Error(`File not found: ${filePath}`);
+  }
+  const stat = fs.statSync(resolved);
+  if (!stat.isFile()) {
+    throw new Error(`Not a file: ${filePath}`);
+  }
+  try {
+    fs.accessSync(resolved, fs.constants.R_OK);
+  } catch {
+    throw new Error(`File not readable: ${filePath}`);
+  }
+  return resolved;
+}
+
 export function createTokenTrimmerMcpServer(): Server {
   const server = new Server(
     {
@@ -86,14 +103,20 @@ export function createTokenTrimmerMcpServer(): Server {
     try {
       switch (name) {
         case 'token_skeletonize': {
-          let source = args.code as string;
-          const targetPath = (args.filePath as string) || 'index.ts';
-          if (!source && args.filePath && fs.existsSync(args.filePath as string)) {
-            source = fs.readFileSync(args.filePath as string, 'utf8');
-          }
-          if (!source) throw new Error('Either "code" or a valid "filePath" must be provided.');
+          let source = typeof args.code === 'string' ? args.code : undefined;
+          const targetPath = typeof args.filePath === 'string' ? args.filePath : undefined;
 
-          const skeleton = skeletonize(source, targetPath, {
+          if (source === undefined && targetPath === undefined) {
+            throw new Error('Either "code" or "filePath" must be provided.');
+          }
+
+          if (source === undefined) {
+            const stat = resolveReadableFile(targetPath as string);
+            source = fs.readFileSync(stat, 'utf8');
+          }
+
+          const effectivePath = targetPath ?? 'snippet.ts';
+          const skeleton = skeletonize(source, effectivePath, {
             preserveDocstrings: args.preserveDocstrings !== false
           });
           const stats = computeTokenStats(source, skeleton);
@@ -140,11 +163,19 @@ export function createTokenTrimmerMcpServer(): Server {
         }
 
         case 'token_count': {
-          let text = args.text as string;
-          if (!text && args.filePath && fs.existsSync(args.filePath as string)) {
-            text = fs.readFileSync(args.filePath as string, 'utf8');
+          const hasText = typeof args.text === 'string' && args.text.length > 0;
+          const hasPath = typeof args.filePath === 'string' && args.filePath.length > 0;
+
+          if (!hasText && !hasPath) {
+            throw new Error('Either "text" or "filePath" must be provided.');
           }
-          if (!text) text = '';
+
+          let text: string;
+          if (hasText) {
+            text = args.text as string;
+          } else {
+            text = fs.readFileSync(resolveReadableFile(args.filePath as string), 'utf8');
+          }
 
           const tokens = countTokens(text);
           return {
@@ -168,7 +199,10 @@ export function createTokenTrimmerMcpServer(): Server {
         }
 
         case 'token_pack_context': {
-          const result = packDirectory(args.dirPath as string, {
+          if (typeof args.dirPath !== 'string' || args.dirPath.length === 0) {
+            throw new Error('"dirPath" is required and must be a non-empty string.');
+          }
+          const result = packDirectory(args.dirPath, {
             maxTokens: args.maxTokens as number,
             mode: args.mode as any
           });
@@ -180,6 +214,11 @@ export function createTokenTrimmerMcpServer(): Server {
                   totalFiles: result.totalFiles,
                   totalTokens: result.totalTokens,
                   budgetTokens: result.budgetTokens,
+                  rawTokens: result.rawTokens,
+                  tokensSaved: result.tokensSaved,
+                  reductionPercentage: `${result.reductionPercentage}%`,
+                  truncatedFiles: result.truncatedFiles,
+                  skippedFiles: result.skippedFiles,
                   files: result.files,
                   packedContent: result.packedContent
                 }, null, 2)

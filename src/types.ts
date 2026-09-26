@@ -44,9 +44,15 @@ export interface PackOptions {
 }
 
 export interface PackResult {
-  files: { path: string; tokens: number; mode: string }[];
+  files: { path: string; tokens: number; mode: string; truncated: boolean }[];
   totalFiles: number;
   totalTokens: number;
   budgetTokens: number;
   packedContent: string;
+  skippedFiles: { path: string; reason: string; tokens?: number }[];
+  truncatedFiles: string[];
+  rawTokens: number;
+  contentTokens: number;
+  tokensSaved: number;
+  reductionPercentage: number;
 }
