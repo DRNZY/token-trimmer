@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Token Trimmer Motion Graphics</title>
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(18, 22, 34, 0.75);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f0f4fc;
+      --muted: #8892b0;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'DejaVu Sans Mono', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+    }
+    #stage {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      background: radial-gradient(circle at 50% 30%, #111827 0%, #07090e 70%);
+      overflow: hidden;
+    }
+    /* Grid Background */
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.8;
+    }
+    /* Ambient Glows */
+    .glow-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    /* Header Bar */
+    .header-bar {
+      position: absolute;
+      top: 48px;
+      left: 80px;
+      right: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+    }
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-tag {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--cyan);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    /* Center Stage Container */
+    .main-viewport {
+      position: absolute;
+      inset: 120px 80px 80px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    /* Scene Elements */
+    .scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Code Comparison Card */
+    .code-box {
+      width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+    }
+    .code-header {
+      background: rgba(255,255,255,0.04);
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .code-content {
+      padding: 28px 32px;
+      font-family: var(--font-mono);
+      font-size: 20px;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+    /* Token Meter Card */
+    .token-meter-card {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      background: rgba(18, 22, 34, 0.9);
+      border: 1px solid var(--border);
+      padding: 20px 36px;
+      border-radius: 16px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+    .meter-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .meter-value {
+      font-size: 38px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+    /* Stat Grid (Scene 3) */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      width: 1200px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 30px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .stat-num {
+      font-size: 64px;
+      font-weight: 900;
+      font-family: var(--font-mono);
+      margin-bottom: 8px;
+    }
+    .stat-desc {
+      font-size: 17px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div class="grid-bg"></div>
+    <div class="glow-blob" id="blob1" style="width: 500px; height: 500px; background: rgba(56, 189, 248, 0.15); top: -100px; left: 200px;"></div>
+    <div class="glow-blob" id="blob2" style="width: 600px; height: 600px; background: rgba(16, 185, 129, 0.12); bottom: -150px; right: 100px;"></div>
+
+    <div class="header-bar">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-title">TOKEN TRIMMER</div>
+      </div>
+      <div class="brand-tag" id="status-tag">AST SKELETONIZER</div>
+    </div>
+
+    <div class="main-viewport">
+      <!-- Scene 1 & 2: AST Trimming Transformation -->
+      <div class="scene" id="scene-transform">
+        <div class="code-box" id="code-box">
+          <div class="code-header">
+            <div class="dots">
+              <div class="dot" style="background: #ef4444;"></div>
+              <div class="dot" style="background: #f59e0b;"></div>
+              <div class="dot" style="background: #10b981;"></div>
+            </div>
+            <div id="code-file" style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">auth_service.ts</div>
+            <div id="badge-mode" style="font-size: 12px; font-weight: 700; color: var(--rose); background: rgba(244,63,94,0.15); padding: 4px 10px; border-radius: 6px;">RAW FULL AST (128K)</div>
+          </div>
+          <div class="code-content" id="code-content">
+            <!-- Dynamically transformed via seek(t) -->
+          </div>
+        </div>
+
+        <div class="token-meter-card" id="meter-card">
+          <div>
+            <div class="meter-label">Context Tokens</div>
+            <div class="meter-value" id="meter-tokens" style="color: var(--rose);">128,450</div>
+          </div>
+          <div style="width: 1px; height: 50px; background: var(--border);"></div>
+          <div>
+            <div class="meter-label">Token Savings</div>
+            <div class="meter-value" id="meter-savings" style="color: var(--emerald);">0%</div>
+          </div>
+          <div style="width: 1px; height: 50px; background: var(--border);"></div>
+          <div>
+            <div class="meter-label">Agent Latency</div>
+            <div class="meter-value" id="meter-speed" style="color: var(--cyan);">1.0x</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 3: Benchmark & Metrics -->
+      <div class="scene" id="scene-metrics" style="opacity: 0; pointer-events: none;">
+        <h2 style="font-size: 44px; font-weight: 800; margin-bottom: 40px; letter-spacing: -1px;">
+          Autonomous Agent Context Optimization
+        </h2>
+        <div class="stat-grid">
+          <div class="stat-card" id="sc1">
+            <div class="stat-num" style="color: var(--emerald);">-93.6%</div>
+            <div class="stat-desc">Token Context Reduction</div>
+          </div>
+          <div class="stat-card" id="sc2">
+            <div class="stat-num" style="color: var(--cyan);">4.2x</div>
+            <div class="stat-desc">Subagent Parsing Speed</div>
+          </div>
+          <div class="stat-card" id="sc3">
+            <div class="stat-num" style="color: var(--amber);">100%</div>
+            <div class="stat-desc">Type & Signature Fidelity</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 4: Outro & Installation -->
+      <div class="scene" id="scene-outro" style="opacity: 0; pointer-events: none;">
+        <div style="font-size: 20px; font-weight: 700; color: var(--cyan); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px;">
+          NOW SUPERSEDED BY CONTEXTVM
+        </div>
+        <h1 style="font-size: 72px; font-weight: 900; letter-spacing: -2px; margin-bottom: 24px; background: linear-gradient(135deg, #fff 40%, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          Surgical AST Skeletonization
+        </h1>
+        <div style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan); padding: 22px 48px; border-radius: 16px; font-family: var(--font-mono); font-size: 26px; color: #a7f3d0; box-shadow: 0 0 50px rgba(56, 189, 248, 0.25);">
+          $ npm install -g contextvm
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Closed-form spring step response: step(tau, f, z)
+    function spring(t, delay = 0, freq = 3.5, zeta = 0.75) {
+      if (t < delay) return 0;
+      const tau = t - delay;
+      const omega = 2 * Math.PI * freq;
+      const alpha = zeta * omega;
+      const beta = omega * Math.sqrt(Math.max(0.001, 1 - zeta * zeta));
+      const val = 1 - Math.exp(-alpha * tau) * (Math.cos(beta * tau) + (alpha / beta) * Math.sin(beta * tau));
+      return Math.min(1.2, Math.max(0, val));
+    }
+
+    // Easing functions
+    function easeInOutCubic(x) {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+    function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+
+    const rawCode = `export class AuthenticationService {
+  private keyStore: Map<string, CryptographicKey>;
+  private rateLimiter: DistributedRateLimiter;
+
+  constructor(config: SecurityConfig) {
+    this.keyStore = new Map();
+    this.rateLimiter = new DistributedRateLimiter(config.maxRequestsPerSec);
+    this.initializeKeyRing(config.vaultSecret);
+  }
+
+  public async verifyToken(token: string, scope: AuthScope): Promise<ValidationResult> {
+    const parsed = JwtDecoder.parse(token);
+    if (!parsed || parsed.isExpired()) {
+      throw new AuthenticationError("Token expired or malformed header");
+    }
+    const signature = await this.cryptoEngine.verify(parsed.rawSignature, this.keyStore);
+    return { isValid: signature.valid, principal: parsed.subject, scopes: parsed.scopes };
+  }
+}`;
+
+    const trimmedCode = `export class AuthenticationService {
+  private keyStore: Map<string, CryptographicKey>;
+  private rateLimiter: DistributedRateLimiter;
+
+  constructor(config: SecurityConfig);
+  public async verifyToken(token: string, scope: AuthScope): Promise<ValidationResult>;
+}`;
+
+    // Deterministic Frame Render Hook
+    window.seek = async function(t) {
+      const sceneTransform = document.getElementById('scene-transform');
+      const sceneMetrics = document.getElementById('scene-metrics');
+      const sceneOutro = document.getElementById('scene-outro');
+      
+      const codeContent = document.getElementById('code-content');
+      const codeBox = document.getElementById('code-box');
+      const badgeMode = document.getElementById('badge-mode');
+      const meterTokens = document.getElementById('meter-tokens');
+      const meterSavings = document.getElementById('meter-savings');
+      const meterSpeed = document.getElementById('meter-speed');
+
+      // 0.0s - 3.2s: Raw Bloated Code
+      if (t < 3.2) {
+        sceneTransform.style.opacity = '1';
+        sceneMetrics.style.opacity = '0';
+        sceneOutro.style.opacity = '0';
+        
+        codeContent.innerText = rawCode;
+        badgeMode.innerText = 'RAW FULL AST (128K)';
+        badgeMode.style.color = 'var(--rose)';
+        badgeMode.style.background = 'rgba(244,63,94,0.15)';
+        
+        meterTokens.innerText = '128,450';
+        meterTokens.style.color = 'var(--rose)';
+        meterSavings.innerText = '0%';
+        meterSpeed.innerText = '1.0x';
+      }
+      // 3.2s - 6.5s: Laser Trim Transformation
+      else if (t < 6.5) {
+        sceneTransform.style.opacity = '1';
+        sceneMetrics.style.opacity = '0';
+        sceneOutro.style.opacity = '0';
+
+        const p = clamp((t - 3.2) / 2.0, 0, 1);
+        const s = spring(t, 3.2, 4.0, 0.7);
+
+        codeContent.innerText = trimmedCode;
+        badgeMode.innerText = 'AST SKELETONIZED (-93.6%)';
+        badgeMode.style.color = 'var(--emerald)';
+        badgeMode.style.background = 'rgba(16,185,129,0.15)';
+
+        const curTokens = Math.round(128450 - (128450 - 8240) * p);
+        meterTokens.innerText = curTokens.toLocaleString();
+        meterTokens.style.color = p > 0.5 ? 'var(--emerald)' : 'var(--amber)';
+        meterSavings.innerText = (p * 93.6).toFixed(1) + '%';
+        meterSpeed.innerText = (1.0 + p * 3.2).toFixed(1) + 'x';
+
+        codeBox.style.transform = `scale(${1 + 0.02 * Math.sin(p * Math.PI)})`;
+      }
+      // 6.5s - 9.5s: Benchmark Cards
+      else if (t < 9.5) {
+        sceneTransform.style.opacity = '0';
+        sceneMetrics.style.opacity = '1';
+        sceneOutro.style.opacity = '0';
+
+        const s1 = spring(t, 6.6, 4.5, 0.75);
+        const s2 = spring(t, 6.8, 4.5, 0.75);
+        const s3 = spring(t, 7.0, 4.5, 0.75);
+
+        document.getElementById('sc1').style.transform = `translateY(${(1 - s1) * 40}px) scale(${s1})`;
+        document.getElementById('sc2').style.transform = `translateY(${(1 - s2) * 40}px) scale(${s2})`;
+        document.getElementById('sc3').style.transform = `translateY(${(1 - s3) * 40}px) scale(${s3})`;
+      }
+      // 9.5s - 12.0s: Outro & ContextVM Call to Action
+      else {
+        sceneTransform.style.opacity = '0';
+        sceneMetrics.style.opacity = '0';
+        sceneOutro.style.opacity = '1';
+
+        const so = spring(t, 9.6, 3.5, 0.8);
+        sceneOutro.style.transform = `scale(${0.9 + so * 0.1})`;
+      }
+    };
+
+    window.ready = true;
+  </script>
+</body>
+</html>
